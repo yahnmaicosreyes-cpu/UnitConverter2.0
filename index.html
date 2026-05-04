@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter</title>
+    
+    <style>
+        /* =========================================
+           THEME & ACCESSIBILITY VARIABLES
+           Change these to update the entire app UI
+           ========================================= */
+        :root {
+            --navy: #001f3f;       /* Primary dark color for high contrast */
+            --white: #ffffff;      /* Primary light color */
+            --light-gray: #f4f4f4; /* Background color to reduce eye strain */
+            --font-size: 22px;     /* Minimum font size for readability */
+            --button-height: 70px; /* Fat-finger friendly button height */
+        }
+
+        /* Base Layout */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--navy);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px; /* Restricts width on larger screens */
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        /* Input Fields */
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: var(--font-size);
+        }
+
+        input, select {
+            width: 100%;
+            height: 60px;
+            font-size: var(--font-size);
+            border: 2px solid var(--navy);
+            border-radius: 8px;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        /* Buttons (Fat-finger friendly spacing) */
+        .button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 24px; /* 24px gap prevents accidental double-tapping */
+            margin-top: 30px;
+        }
+
+        button {
+            width: 100%;
+            height: var(--button-height);
+            font-size: var(--font-size);
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+        }
+
+        .btn-convert {
+            background-color: var(--navy);
+            color: var(--white);
+        }
+
+        .btn-clear {
+            background-color: #666666; /* Distinct from primary action */
+            color: var(--white);
+        }
+
+        /* Result Display Area */
+        .result-area {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: var(--white);
+            border: 3px solid var(--navy);
+            border-radius: 12px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #resultText {
+            font-size: 26px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* Conversion Reference Table */
+        .table-container {
+            margin-top: 50px;
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+        }
+
+        table {
+            width: 100%;
+            border: 2px solid var(--navy);
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--navy);
+            color: var(--white);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Unit Converter</h1>
+
+    <div class="input-group">
+        <label for="inputValue">Enter Number:</label>
+        <input type="number" id="inputValue" placeholder="0.00" inputmode="decimal">
+    </div>
+
+    <div class="input-group">
+        <label for="mode">Conversion Type:</label>
+        <select id="mode">
+            <option value="kmToMi">Kilometers to Miles</option>
+            <option value="miToKm">Miles to Kilometers</option>
+        </select>
+    </div>
+
+    <div class="button-stack">
+        <button class="btn-convert" onclick="convert()">CONVERT</button>
+        <button class="btn-clear" onclick="clearAll()">CLEAR</button>
+    </div>
+
+    <div class="result-area">
+        <p id="resultText">Result will appear here</p>
+    </div>
+
+    <table class="table-container">
+        <thead>
+            <tr>
+                <th>KM</th>
+                <th>Miles</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>0.62</td></tr>
+            <tr><td>5</td><td>3.11</td></tr>
+            <tr><td>10</td><td>6.21</td></tr>
+            <tr><td>21.1</td><td>13.1</td></tr>
+            <tr><td>42.2</td><td>26.2</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // High-precision constants (DO NOT MODIFY unless standard changes)
+    const KM_TO_MI = 0.621371;
+    const MI_TO_KM = 1.60934;
+
+    /**
+     * Reads input, determines direction, calculates, and updates the DOM.
+     */
+    function convert() {
+        // 1. Grab DOM elements
+        const inputField = document.getElementById('inputValue');
+        const mode = document.getElementById('mode').value;
+        const resultText = document.getElementById('resultText');
+        
+        // 2. Parse input to float
+        const val = parseFloat(inputField.value);
+
+        // 3. Validation: Catch empty or invalid inputs
+        if (isNaN(val)) {
+            resultText.innerText = "Please enter a number first";
+            resultText.style.color = "red"; // Visual error cue
+            return;
+        }
+
+        // Reset color in case it was red from a previous error
+        resultText.style.color = "var(--navy)";
+        
+        let result = 0;
+        let unit = "";
+
+        // 4. Calculate based on selected dropdown mode
+        if (mode === "kmToMi") {
+            result = val * KM_TO_MI;
+            unit = " miles";
+        } else {
+            result = val * MI_TO_KM;
+            unit = " kilometers";
+        }
+
+        // 5. Output format: "X [unit] = Y [unit]" rounded to 3 decimals
+        const inputUnit = mode === "kmToMi" ? " km = " : " mi = ";
+        resultText.innerText = val + inputUnit + result.toFixed(3) + unit;
+    }
+
+    /**
+     * Resets the application to default state.
+     */
+    function clearAll() {
+        document.getElementById('inputValue').value = "";
+        document.getElementById('resultText').innerText = "Result will appear here";
+        document.getElementById('resultText').style.color = "var(--navy)"; // Reset color
+    }
+</script>
+
+</body>
+</html>
